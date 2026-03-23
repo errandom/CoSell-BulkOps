@@ -35,7 +35,7 @@ export function DashboardTiles({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
       {tiles.map(({ filter, label, colorClass }) => {
         const isActive = activeFilter === filter
         const count = counts[filter]
@@ -51,12 +51,12 @@ export function DashboardTiles({
             )}
             onClick={() => onFilterChange(filter)}
           >
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-muted-foreground">{label}</p>
-                {isActive && <Funnel size={18} className="text-primary" weight="fill" />}
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-xs font-medium text-muted-foreground">{label}</p>
+                {isActive && <Funnel size={16} className="text-primary" weight="fill" />}
               </div>
-              <p className="text-3xl font-semibold font-mono">{count}</p>
+              <p className="text-2xl font-semibold font-mono">{count}</p>
             </div>
           </Card>
         )
