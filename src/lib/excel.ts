@@ -4,16 +4,42 @@ import type { CoSellRecord } from '@/types/coSell'
 export function parseExcelFile(file: File): Promise<any[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
+    const fileExtension = file.name.toLowerCase().split('.').pop()
 
     reader.onload = (e) => {
       try {
         const data = e.target?.result
-        const workbook = XLSX.read(data, { type: 'binary' })
+        
+        let workbook: XLSX.WorkBook
+        
+        if (fileExtension === 'csv') {
+          const csvData = new TextDecoder('utf-8').decode(data as ArrayBuffer)
+          workbook = XLSX.read(csvData, { type: 'string', raw: true })
+        } else {
+          workbook = XLSX.read(data, { 
+            type: 'array',
+            cellDates: true,
+            dateNF: 'mm/dd/yyyy'
+          })
+        }
+        
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]]
-        const jsonData = XLSX.utils.sheet_to_json(firstSheet)
+        
+        if (!firstSheet) {
+          reject(new Error('No data found in file. Please ensure the file contains data.'))
+          return
+        }
+        
+        const jsonData = XLSX.utils.sheet_to_json(firstSheet, {
+          raw: false,
+          dateNF: 'mm/dd/yyyy',
+          defval: ''
+        })
+        
         resolve(jsonData)
       } catch (error) {
-        reject(new Error('Failed to parse Excel file. Please ensure it matches the template format.'))
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        reject(new Error(`Failed to parse file: ${errorMessage}. Please ensure it matches the template format.`))
       }
     }
 
@@ -21,7 +47,7 @@ export function parseExcelFile(file: File): Promise<any[]> {
       reject(new Error('Failed to read the file.'))
     }
 
-    reader.readAsBinaryString(file)
+    reader.readAsArrayBuffer(file)
   })
 }
 

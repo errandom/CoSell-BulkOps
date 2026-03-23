@@ -21,17 +21,22 @@ export function FileUpload({ onFileSelect, isProcessing }: FileUploadProps) {
     setIsDragOver(false)
   }, [])
 
+  const isValidFileType = useCallback((filename: string) => {
+    const validExtensions = ['.xlsx', '.xls', '.xlsm', '.xlsb', '.csv']
+    return validExtensions.some(ext => filename.toLowerCase().endsWith(ext))
+  }, [])
+
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault()
       setIsDragOver(false)
 
       const file = e.dataTransfer.files[0]
-      if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+      if (file && isValidFileType(file.name)) {
         onFileSelect(file)
       }
     },
-    [onFileSelect]
+    [onFileSelect, isValidFileType]
   )
 
   const handleFileInput = useCallback(
@@ -58,7 +63,7 @@ export function FileUpload({ onFileSelect, isProcessing }: FileUploadProps) {
       <label className="flex flex-col items-center justify-center p-12 cursor-pointer">
         <input
           type="file"
-          accept=".xlsx,.xls"
+          accept=".xlsx,.xls,.xlsm,.xlsb,.csv"
           onChange={handleFileInput}
           className="hidden"
           disabled={isProcessing}
@@ -79,10 +84,10 @@ export function FileUpload({ onFileSelect, isProcessing }: FileUploadProps) {
               <UploadSimple size={64} className="text-muted-foreground" weight="duotone" />
               <div className="text-center">
                 <p className="text-lg font-medium text-foreground">
-                  Drop your Excel file here, or click to browse
+                  Drop your file here, or click to browse
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Supports .xlsx and .xls files (max 1,000 rows)
+                  Supports Excel (.xlsx, .xls, .xlsm, .xlsb) and CSV files (max 1,000 rows)
                 </p>
               </div>
             </>
