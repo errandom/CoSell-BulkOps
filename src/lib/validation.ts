@@ -55,7 +55,8 @@ export function validateRecord(data: Record<string, any>, rowNumber: number): Co
     }
   })
 
-  if (data['Consent to share Customer/Partner contact'] !== 'Yes') {
+  const consentValue = data['Consent to share Customer/Partner contact']
+  if (consentValue && String(consentValue).trim() !== '' && consentValue !== 'Yes') {
     issues.push({
       field: 'Consent to share Customer/Partner contact',
       message: 'Must be "Yes" - deals cannot be created or updated without consent',
@@ -136,30 +137,15 @@ export function validateRecord(data: Record<string, any>, rowNumber: number): Co
     }
   }
 
-  if (data['Customer Contact Email Address']) {
-    if (!validateEmail(data['Customer Contact Email Address'])) {
+  const contactEmail = data['Customer Contact Email Address']
+  if (contactEmail && String(contactEmail).trim() !== '') {
+    if (!validateEmail(contactEmail)) {
       issues.push({
         field: 'Customer Contact Email Address',
         message: 'Must be a valid email address',
         severity: 'error'
       })
     }
-  }
-
-  if (!data['Solution 1']) {
-    issues.push({
-      field: 'Solution 1',
-      message: 'At least one solution must be provided',
-      severity: 'error'
-    })
-  }
-
-  if (!data['Team member 1']) {
-    issues.push({
-      field: 'Team member 1',
-      message: 'At least one team member must be provided',
-      severity: 'error'
-    })
   }
 
   if (data['Microsoft help required?'] === 'No' && !data['Share with Microsoft sales team']) {
@@ -258,6 +244,58 @@ export function validateFile(data: any[]): ValidationResult {
   }
 }
 
+function attemptDateConversion(dateValue: any): string | null {
+  if (!dateValue) return null
+  
+  const dateStr = String(dateValue).trim()
+  
+  const formats = [
+    /^(\d{4})-(\d{1,2})-(\d{1,2})$/,
+    /^(\d{1,2})\/(\d{1,2})\/(\d{2})$/,
+    /^(\d{1,2})-(\d{1,2})-(\d{4})$/
+  ]
+  
+  for (const format of formats) {
+    const match = dateStr.match(format)
+    if (match) {
+      let month: number, day: number, year: number
+      
+      if (format === formats[0]) {
+        year = parseInt(match[1])
+        month = parseInt(match[2])
+        day = parseInt(match[3])
+      } else if (format === formats[1]) {
+        month = parseInt(match[1])
+        day = parseInt(match[2])
+        year = 2000 + parseInt(match[3])
+      } else {
+        month = parseInt(match[1])
+        day = parseInt(match[2])
+        year = parseInt(match[3])
+      }
+      
+      const paddedMonth = String(month).padStart(2, '0')
+      const paddedDay = String(day).padStart(2, '0')
+      
+      return `${paddedMonth}/${paddedDay}/${year}`
+    }
+  }
+  
+  try {
+    const date = new Date(dateStr)
+    if (!isNaN(date.getTime())) {
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const year = date.getFullYear()
+      return `${month}/${day}/${year}`
+    }
+  } catch {
+    return null
+  }
+  
+  return null
+}
+
 export function applyBulkFix(
   records: CoSellRecord[],
   pattern: Pattern
@@ -271,6 +309,13 @@ export function applyBulkFix(
 
     if (pattern.id.includes('Consent to share Customer/Partner contact')) {
       updatedData['Consent to share Customer/Partner contact'] = 'Yes'
+    }
+
+    if (pattern.id.includes('Estimated Close Date') && pattern.id.includes('MM/DD/YYYY')) {
+      const convertedDate = attemptDateConversion(record.data['Estimated Close Date'])
+      if (convertedDate) {
+        updatedData['Estimated Close Date'] = convertedDate
+      }
     }
 
     return validateRecord(updatedData, record.rowNumber)
