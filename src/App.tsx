@@ -86,6 +86,8 @@ function App() {
     const errorCount = updatedRecords.filter(r => r.status === 'error').length
     const warningCount = updatedRecords.filter(r => r.status === 'warning').length
     const passedCount = updatedRecords.filter(r => r.status === 'passed').length
+    const existingCount = updatedRecords.filter(r => r.isExisting).length
+    const newCount = updatedRecords.filter(r => !r.isExisting).length
 
     const newResult = {
       records: updatedRecords,
@@ -93,7 +95,9 @@ function App() {
       totalRecords: updatedRecords.length,
       errorCount,
       warningCount,
-      passedCount
+      passedCount,
+      existingCount,
+      newCount
     }
 
     setValidationResult(newResult)
@@ -117,6 +121,8 @@ function App() {
     const errorCount = updatedRecords.filter(r => r.status === 'error').length
     const warningCount = updatedRecords.filter(r => r.status === 'warning').length
     const passedCount = updatedRecords.filter(r => r.status === 'passed').length
+    const existingCount = updatedRecords.filter(r => r.isExisting).length
+    const newCount = updatedRecords.filter(r => !r.isExisting).length
 
     const newResult = {
       records: updatedRecords,
@@ -124,7 +130,9 @@ function App() {
       totalRecords: updatedRecords.length,
       errorCount,
       warningCount,
-      passedCount
+      passedCount,
+      existingCount,
+      newCount
     }
 
     setValidationResult(newResult)
@@ -161,6 +169,10 @@ function App() {
         return validationResult.records.filter(r => r.status === 'warning')
       case 'passed':
         return validationResult.records.filter(r => r.status === 'passed')
+      case 'existing':
+        return validationResult.records.filter(r => r.isExisting)
+      case 'new':
+        return validationResult.records.filter(r => !r.isExisting)
       default:
         return validationResult.records
     }
@@ -193,6 +205,8 @@ function App() {
               errorCount={validationResult.errorCount}
               warningCount={validationResult.warningCount}
               passedCount={validationResult.passedCount}
+              existingCount={validationResult.existingCount}
+              newCount={validationResult.newCount}
               activeFilter={activeFilter}
               onFilterChange={setActiveFilter}
             />
