@@ -12,6 +12,7 @@ export interface CoSellRecord {
   data: Record<string, any>
   status: ValidationSeverity
   issues: ValidationIssue[]
+  isExisting: boolean
 }
 
 export interface Pattern {
@@ -31,9 +32,11 @@ export interface ValidationResult {
   errorCount: number
   warningCount: number
   passedCount: number
+  existingCount: number
+  newCount: number
 }
 
-export type FilterType = 'all' | 'errors' | 'warnings' | 'passed'
+export type FilterType = 'all' | 'errors' | 'warnings' | 'passed' | 'existing' | 'new'
 
 export const MANDATORY_FIELDS = [
   'Deal Name',
