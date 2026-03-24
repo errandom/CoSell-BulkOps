@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { CheckCircle, WarningCircle, XCircle, PencilSimple, CaretDown, CaretUp } from '@phosphor-icons/react'
+import { CheckCircle, WarningCircle, XCircle, PencilSimple, CaretDown, CaretUp, ArrowsClockwise, Plus } from '@phosphor-icons/react'
 import { Separator } from '@/components/ui/separator'
 import { formatCurrency, formatDate } from '@/lib/excel'
 import { cn } from '@/lib/utils'
@@ -56,11 +56,22 @@ export function RecordItem({ record, onEdit }: RecordItemProps) {
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className="text-xs font-mono text-muted-foreground">Row {record.rowNumber}</span>
                   <Badge variant="outline" className={cn('text-xs', statusBgColor, 'text-white border-0')}>
                     {record.status}
                   </Badge>
+                  {record.isExisting ? (
+                    <Badge variant="outline" className="text-xs bg-secondary text-secondary-foreground border-0 gap-1">
+                      <ArrowsClockwise size={12} weight="bold" />
+                      Existing
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-xs bg-accent text-accent-foreground border-0 gap-1">
+                      <Plus size={12} weight="bold" />
+                      New
+                    </Badge>
+                  )}
                 </div>
                 <h4 className="font-semibold text-base truncate">
                   {record.data['Deal Name'] || 'Untitled Deal'}
