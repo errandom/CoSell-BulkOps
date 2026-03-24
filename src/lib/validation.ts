@@ -41,8 +41,15 @@ function validateNumeric(value: any): boolean {
   return !isNaN(Number(value))
 }
 
+function isValidReferralId(value: any): boolean {
+  if (!value) return false
+  const str = String(value).trim()
+  return str.length > 0 && str !== '' && str !== 'N/A' && str !== 'null' && str !== 'undefined'
+}
+
 export function validateRecord(data: Record<string, any>, rowNumber: number): CoSellRecord {
   const issues: ValidationIssue[] = []
+  const isExisting = isValidReferralId(data['Referral ID'])
 
   MANDATORY_FIELDS.forEach((field) => {
     const value = data[field]
@@ -179,7 +186,8 @@ export function validateRecord(data: Record<string, any>, rowNumber: number): Co
     rowNumber,
     data,
     status,
-    issues
+    issues,
+    isExisting
   }
 }
 
@@ -233,6 +241,8 @@ export function validateFile(data: any[]): ValidationResult {
   const errorCount = records.filter(r => r.status === 'error').length
   const warningCount = records.filter(r => r.status === 'warning').length
   const passedCount = records.filter(r => r.status === 'passed').length
+  const existingCount = records.filter(r => r.isExisting).length
+  const newCount = records.filter(r => !r.isExisting).length
 
   return {
     records,
@@ -240,7 +250,9 @@ export function validateFile(data: any[]): ValidationResult {
     totalRecords: records.length,
     errorCount,
     warningCount,
-    passedCount
+    passedCount,
+    existingCount,
+    newCount
   }
 }
 
